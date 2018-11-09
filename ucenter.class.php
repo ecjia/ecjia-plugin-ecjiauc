@@ -1,0 +1,452 @@
+<?php
+
+use Ecjia\App\User\Integrate\UserIntegrateAbstract;
+
+defined('IN_ECJIA') or exit('No permission resources.');
+
+/**
+ * UCenter 会员数据处理类
+ */
+class ucenter extends UserIntegrateAbstract
+{
+
+    /* 是否需要同步数据到商城 */
+    protected $need_sync = false;
+
+    public function setConfig(array $config)
+    {
+        parent::setConfig($config);
+
+        if (! empty($config['uc_key'])) {
+            RC_Config::set('ucenter::ucenter.key', $config['uc_key']);
+        }
+
+        if (! empty($config['uc_url'])) {
+            RC_Config::set('ucenter::ucenter.api', $config['uc_url']);
+        }
+
+        if (! empty($config['uc_charset'])) {
+            RC_Config::set('ucenter::ucenter.charset', $config['uc_charset']);
+        }
+
+        if (! empty($config['uc_id'])) {
+            RC_Config::set('ucenter::ucenter.appid', $config['uc_id']);
+        }
+
+        if (! empty($config['uc_ip'])) {
+            RC_Config::set('ucenter::ucenter.ip', $config['uc_ip']);
+        }
+
+    }
+
+    /**
+     * 获取插件代号
+     *
+     * @see \Ecjia\System\Plugin\PluginInterface::getCode()
+     */
+    public function getCode()
+    {
+        return 'ucenter';
+    }
+
+    /**
+     * 加载配置文件
+     *
+     * @see \Ecjia\System\Plugin\PluginInterface::loadConfig()
+     */
+    public function loadConfig($key = null, $default = null)
+    {
+        return $this->loadPluginData(RC_Plugin::plugin_dir_path(__FILE__) . 'config.php', $key, $default);
+    }
+
+    /**
+     * 加载语言包
+     *
+     * @see \Ecjia\System\Plugin\PluginInterface::loadLanguage()
+     */
+    public function loadLanguage($key = null, $default = null)
+    {
+        $locale = RC_Config::get('system.locale');
+
+        return $this->loadPluginData(RC_Plugin::plugin_dir_path(__FILE__) . '/languages/'.$locale.'/plugin.lang.php', $key, $default);
+    }
+
+    /**
+     * 获取插件的元数据
+     *
+     * @return \Royalcms\Component\Support\Collection
+     */
+    public function getPluginMateData()
+    {
+        return collect([
+            'integrate_id'      => 2,
+            'integrate_code'    => $this->getCode(),
+            'integrate_name'    => $this->loadLanguage('ucenter'),
+            'integrate_desc'    => $this->loadLanguage('ucenter_desc'),
+            'configure'         => null,
+        ]);
+    }
+
+    /**
+     *  获取指定用户的信息
+     *
+     * @param $username
+     * @return array
+     */
+    public function getProfileByName($username)
+    {
+        $row = RC_DB::table('users')
+            ->select('user_id', 'user_name', 'email', 'sex', 'birthday', 'reg_time', 'password')
+            ->where('user_name', $username)
+            ->first();
+
+        return $row;
+    }
+
+
+    /**
+     *  获取指定用户的信息
+     *
+     * @param $id
+     * @return array
+     */
+    public function getProfileById($id)
+    {
+        $row = RC_DB::table('users')
+            ->select('user_id', 'user_name', 'email', 'sex', 'birthday', 'reg_time', 'password')
+            ->where('user_id', $id)
+            ->first();
+
+        return $row;
+    }
+
+
+    /**
+     *  用户登录函数
+     *
+     * @access  public
+     * @param   string  $username
+     * @param   string  $password
+     *
+     * @return boolean
+     */
+    public function login($username, $password, $remember = null)
+    {
+		if (is_email($username)) {
+            $count = RC_DB::table('users')->where('email', $username)->count();
+			if ($count > 1) {
+
+				$this->error = '邮箱有重复，请使用用户名登录！';
+
+				return false;
+
+			} else {
+                $username = RC_DB::table('users')->select('user_name')->where('email', $username)->pluck('user_name');
+
+				if (! $username) {
+					$this->error = '邮箱或密码错误！';
+
+					return false;	
+				}
+			}
+		}
+
+		
+        list($uid, $uname, $pwd, $email, $repeat) = uc_call("uc_user_login", array($username, $password));
+        $uname = addslashes($uname);
+        if ($uid > 0) {
+            //检查用户是否存在,不存在直接放入用户表
+            $result = RC_DB::table('users')->select('user_id', 'ec_salt')->where('user_name', $username)->fisrt();
+            $name_exist = $result['user_id'];
+            if (empty($result['ec_salt'])) {
+                $user_exist = RC_DB::table('users')->where('user_name', $username)->where('password', $this->compilePassword($password))->pluck('user_id');
+                if (! empty($user_exist)) {
+                    $ec_salt = rand(1, 9999);
+                    RC_DB::table('users')->where('user_id', $uid)->update([
+                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\User\Integrate\Password::PWD_SUF_SALT),
+                        'ec_salt' => $ec_salt
+                    ]);
+                }
+            } else {
+                $user_exist = RC_DB::table('users')->where('user_name', $username)
+                    ->where('password', $this->compilePassword($password, null, $result['ec_salt'], \Ecjia\App\User\Integrate\Password::PWD_SUF_SALT))
+                    ->pluck('user_id');
+            }
+            
+            if (empty($user_exist)) {
+                if (empty($name_exist)) {
+                    $reg_date = SYS_TIME;
+                    $ip = RC_Ip::client_ip();
+                    $password = $this->compilePassword($password);
+                    RC_DB::table('users')->insert([
+                        'user_id'       => $uid,
+                        'email'         => $email,
+                        'user_name'     => $uname,
+                        'password'      => $password,
+                        'reg_time'      => $reg_date,
+                        'last_login'    => $reg_date,
+                        'last_ip'       => $ip,
+                    ]);
+                } else {
+                    if (empty($result['ec_salt'])) {
+                         $result['ec_salt'] = 0;
+                    }
+                    RC_DB::table('users')->where('user_id', $uid)->update([
+                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\User\Integrate\Password::PWD_SUF_SALT),
+                        'ec_salt' => $result['ec_salt']
+                    ]);
+                }
+            }
+
+            $this->setSession($uname);
+            $this->setCookie($uname);
+            $this->ucdata = uc_call('uc_user_synlogin', array($uid));
+
+            return true;
+        } elseif($uid == -1) {
+            $this->error = self::ERR_INVALID_USERNAME;
+            return false;
+        } elseif ($uid == -2) {
+            $this->error = self::ERR_INVALID_PASSWORD;
+            return false;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 用户退出
+     *
+     * @return bool
+     */
+    public function logout()
+    {
+        $this->setCookie();  //清除cookie
+        $this->setSession(); //清除session
+        $this->ucdata = uc_call('uc_user_synlogout');   //同步退出
+        return true;
+    }
+
+    /**
+     * 添加用户
+     *
+     * @param $username
+     * @param $password
+     * @param $email
+     * @param int $gender
+     * @param int $bday
+     * @param int $reg_date
+     * @param string $md5password
+     * @return bool
+     */
+    public function addUser($username, $password, $email, $gender = -1, $bday = 0, $reg_date = 0, $md5password = null)
+    {
+        /* 检测用户名 */
+        if ($this->checkUser($username)) {
+            $this->error = self::ERR_USERNAME_EXISTS;
+            return false;
+        }
+
+        $uid = uc_call('uc_user_register', array($username, $password, $email));
+        if ($uid <= 0) {
+            if($uid == -1) {
+                $this->error = self::ERR_INVALID_USERNAME;
+                return false;
+            } elseif($uid == -2) {
+                $this->error = self::ERR_USERNAME_NOT_ALLOW;
+                return false;
+            } elseif($uid == -3) {
+                $this->error = self::ERR_USERNAME_EXISTS;
+                return false;
+            } elseif($uid == -4) {
+                $this->error = self::ERR_INVALID_EMAIL;
+                return false;
+            } elseif($uid == -5) {
+                $this->error = self::ERR_EMAIL_NOT_ALLOW;
+                return false;
+            } elseif($uid == -6) {
+                $this->error = self::ERR_EMAIL_EXISTS;
+                return false;
+            } else {
+                return false;
+            }
+        } else {
+            //注册成功，插入用户表
+            $reg_date = SYS_TIME;
+            $ip = RC_Ip::client_ip();
+            $password = $this->compilePassword($password);
+            $data = array(
+            	'user_id'      => $uid,
+                'email'        => $email,
+                'user_name'    => $username,
+                'password'     => $password,
+                'reg_time'     => $reg_date,
+                'last_login'   => $reg_date,
+                'last_ip'      => $ip
+            );
+            RC_DB::table('users')->insert($data);
+            return true;
+        }
+    }
+
+    /**
+     *  检查指定用户是否存在及密码是否正确
+     *
+     * @param   string  $username   用户名
+     *
+     * @return  int
+     */
+    public function checkUser($username, $password = null)
+    {
+        $userdata = uc_call('uc_user_checkname', array($username));
+        if ($userdata == 1) {
+            return false;
+        } else {
+            return  true;
+        }
+    }
+
+    /**
+     * 检测Email是否合法
+     *
+     * @access  public
+     * @param   string  $email   邮箱
+     *
+     * @return  boolean
+     */
+    public function checkEmail($email)
+    {
+        if (! empty($email)) {
+            $email_exist = uc_call('uc_user_checkemail', array($email));
+            if ($email_exist == 1) {
+                return false;
+            } else {
+                $this->error = self::ERR_EMAIL_EXISTS;
+                return true;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 编辑用户信息
+     *
+     * @param $username
+     * @param null $password
+     * @param null $old_password
+     * @param $email
+     * @param int $gender
+     * @param int $bday
+     * @param null $md5_password
+     * @param null $forget_pwd
+     * @return bool
+     */
+    public function editUser($params)
+    {
+        $username       = array_get($params, 'username');
+        $password       = array_get($params, 'password');
+        $oldpassword    = array_get($params, 'old_password');
+        $email          = array_get($params, 'email');
+        $gender         = array_get($params, 'gender', '-1');
+        $bday           = array_get($params, 'birthday', '0');
+        $md5password    = array_get($params, 'md5_password');
+        $forget_pwd     = array_get($params, 'forget_pwd');
+
+        $real_username = $username;
+        $username = addslashes($username);
+        $data = array(
+            'email'     => $email,
+            'sex'       => $gender,
+            'birthday'  => $bday,
+        );
+
+        $flag  = false;
+
+        if (!empty($data)) {
+            RC_DB::table('users')->where('user_name', $username)->update($data);
+            $flag  = true;
+        }
+
+        if (!empty($email)) {
+            $ucresult = uc_call("uc_user_edit", array($username, '', '', $email, 1));
+            if ($ucresult > 0 ) {
+                $flag = true;
+            } elseif($ucresult == -4) {
+                //echo 'Email 格式有误';
+                $this->error = self::ERR_INVALID_EMAIL;
+                return false;
+            } elseif($ucresult == -5) {
+                //echo 'Email 不允许注册';
+                $this->error = self::ERR_INVALID_EMAIL;
+                return false;
+            } elseif($ucresult == -6) {
+                //echo '该 Email 已经被注册';
+                $this->error = self::ERR_EMAIL_EXISTS;
+                return false;
+            } elseif ($ucresult < 0 ) {
+                return false;
+            }
+        }
+        
+        if (!empty($oldpassword) && !empty($password) && $forget_pwd == 0) {
+            $ucresult = uc_call("uc_user_edit", array($real_username, $oldpassword, $password, null));
+            if ($ucresult > 0 ) {
+                return true;
+            } else {
+                $this->error = self::ERR_INVALID_PASSWORD;
+                return false;
+            }
+        } elseif (!empty($password) && $forget_pwd == 1) {
+            $ucresult = uc_call("uc_user_edit", array($real_username, '', $password, '', 1));
+            if ($ucresult > 0 ) {
+                $flag = true;
+            }
+        }
+
+        return $flag;
+    }
+
+
+    /**
+     * 检查cookie是正确，返回用户名
+     *
+     * @return
+     */
+    public function checkCookie()
+    {
+        return '';
+    }
+
+    /**
+     * 根据登录状态设置cookie
+     *
+     * @return bool
+     */
+    public function getCookie()
+    {
+        $id = $this->checkCookie();
+        if ($id) {
+            $this->setSession($id);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * 删除用户
+     *
+     * @param $username
+     */
+    public function removeUser($username)
+    {
+        //仅删除本地用户，不删除UCenter用户
+        $this->syncRemoveUser($username);
+
+        return true;
+    }
+
+}
+
+// end
