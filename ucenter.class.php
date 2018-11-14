@@ -1,6 +1,6 @@
 <?php
 
-use Ecjia\App\User\Integrate\UserIntegrateAbstract;
+use Ecjia\App\Integrate\UserIntegrateAbstract;
 
 defined('IN_ECJIA') or exit('No permission resources.');
 
@@ -163,13 +163,13 @@ class ucenter extends UserIntegrateAbstract
                 if (! empty($user_exist)) {
                     $ec_salt = rand(1, 9999);
                     RC_DB::table('users')->where('user_id', $uid)->update([
-                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\User\Integrate\Password::PWD_SUF_SALT),
+                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\Integrate\Password::PWD_SUF_SALT),
                         'ec_salt' => $ec_salt
                     ]);
                 }
             } else {
                 $user_exist = RC_DB::table('users')->where('user_name', $username)
-                    ->where('password', $this->compilePassword($password, null, $result['ec_salt'], \Ecjia\App\User\Integrate\Password::PWD_SUF_SALT))
+                    ->where('password', $this->compilePassword($password, null, $result['ec_salt'], \Ecjia\App\Integrate\Password::PWD_SUF_SALT))
                     ->pluck('user_id');
             }
             
@@ -192,7 +192,7 @@ class ucenter extends UserIntegrateAbstract
                          $result['ec_salt'] = 0;
                     }
                     RC_DB::table('users')->where('user_id', $uid)->update([
-                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\User\Integrate\Password::PWD_SUF_SALT),
+                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\Integrate\Password::PWD_SUF_SALT),
                         'ec_salt' => $result['ec_salt']
                     ]);
                 }
