@@ -6,7 +6,7 @@ Description: UCenter会员系统
 Author: ECJIA TEAM
 Version: 2.0.0
 Author URI: http://www.ecjia.com/
-Plugin App: user
+Plugin App: integrate
 */
 defined('IN_ECJIA') or exit('No permission resources.');
 
@@ -14,13 +14,13 @@ class plugin_integrate_ucenter {
 
     public static function install() {
         $param = array('file' => __FILE__);
-        return RC_Api::api('user', 'integrate_install', $param);
+        return RC_Api::api('integrate', 'integrate_install', $param);
     }
 
 
     public static function uninstall() {
         $param = array('file' => __FILE__);
-        return RC_Api::api('user', 'integrate_uninstall', $param);
+        return RC_Api::api('integrate', 'integrate_uninstall', $param);
     }
 
 }
