@@ -7,7 +7,7 @@ defined('IN_ECJIA') or exit('No permission resources.');
 /**
  * UCenter 会员数据处理类
  */
-class ucenter extends UserIntegrateAbstract
+class ecjiauc extends UserIntegrateAbstract
 {
 
     /* 是否需要同步数据到商城 */
