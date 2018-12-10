@@ -33,7 +33,7 @@ Ecjia_PluginManager::extend('ecjiauc', function() {
 RC_Plugin::register_activation_hook(__FILE__, array('plugin_integrate_ucenter', 'install'));
 RC_Plugin::register_deactivation_hook(__FILE__, array('plugin_integrate_ucenter', 'uninstall'));
 
-if (! function_exists('uc_call')) {
+if (! function_exists('ecjia_uc_call')) {
     /**
      * 调用UCenter的函数
      *
@@ -42,7 +42,7 @@ if (! function_exists('uc_call')) {
      *
      * @return mixed
      */
-    function uc_call($func, $params = null)
+    function ecjia_uc_call($func, $params = null)
     {
         if (ecjia::config('integrate_code') == 'ecjiauc') {
             restore_error_handler();

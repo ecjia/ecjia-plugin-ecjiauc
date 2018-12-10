@@ -152,7 +152,7 @@ class ecjiauc extends UserIntegrateAbstract
 		}
 
 		
-        list($uid, $uname, $pwd, $email, $repeat) = uc_call("uc_user_login", array($username, $password));
+        list($uid, $uname, $pwd, $email, $repeat) = ecjia_uc_call("uc_user_login", array($username, $password));
         $uname = addslashes($uname);
         if ($uid > 0) {
             //检查用户是否存在,不存在直接放入用户表
@@ -223,7 +223,7 @@ class ecjiauc extends UserIntegrateAbstract
     {
         $this->setCookie();  //清除cookie
         $this->setSession(); //清除session
-        $this->ucdata = uc_call('uc_user_synlogout');   //同步退出
+        $this->ucdata = ecjia_uc_call('uc_user_synlogout');   //同步退出
         return true;
     }
 
