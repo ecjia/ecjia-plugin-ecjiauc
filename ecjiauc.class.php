@@ -300,7 +300,6 @@ class ecjiauc extends UserIntegrateAbstract
      *  检查指定用户是否存在及密码是否正确
      *
      * @param   string  $username   用户名
-     *
      * @return  int
      */
     public function checkUser($username, $password = null)
