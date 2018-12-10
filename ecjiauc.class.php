@@ -242,15 +242,14 @@ class ecjiauc extends UserIntegrateAbstract
      */
     public function addUser($username, $password, $email, $mobile = null, $gender = -1, $bday = 0, $reg_date = 0, $md5password = null)
     {
-        /* 检测用户名 */
-        if ($this->checkUser($username)) {
-            $this->error = self::ERR_USERNAME_EXISTS;
+        /* 检测手机号 */
+        if (is_null($mobile)) {
+            $this->error = self::ERR_INVALID_MOBILE;
             return false;
         }
 
-        /* 检测手机号 */
-        if ($this->checkUser($username)) {
-            $this->error = self::ERR_USERNAME_EXISTS;
+        if ($this->checkMobile($mobile)) {
+            $this->error = self::ERR_MOBILE_EXISTS;
             return false;
         }
 
@@ -318,7 +317,7 @@ class ecjiauc extends UserIntegrateAbstract
      * @param   string  $email   邮箱
      * @return  boolean
      */
-    public function checkEmail($email)
+    public function checkEmail($email, $exclude_username = null)
     {
         if (! empty($email)) {
             $email_exist = ecjia_uc_call('uc_user_checkemail', array($email));
@@ -338,7 +337,7 @@ class ecjiauc extends UserIntegrateAbstract
      * @param   string  $mobile  手机号
      * @return  boolean
      */
-    public function checkMobile($mobile)
+    public function checkMobile($mobile, $exclude_username = null)
     {
         if (! empty($mobile)) {
             $mobile_exist = ecjia_uc_call('uc_user_checkmobile', array($mobile));
