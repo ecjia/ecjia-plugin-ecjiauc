@@ -27,7 +27,7 @@ class plugin_integrate_ecjiauc {
 
 Ecjia_PluginManager::extend('ecjiauc', function() {
     require_once RC_Plugin::plugin_dir_path(__FILE__) . 'ecjiauc.class.php';
-    return new ucenter();
+    return new ecjiauc();
 });
 
 RC_Plugin::register_activation_hook(__FILE__, array('plugin_integrate_ucenter', 'install'));
