@@ -278,12 +278,12 @@ class ecjiauc extends UserIntegrateAbstract
             }
         } else {
             //注册成功，插入用户表
-            $reg_date = SYS_TIME;
             $ip = RC_Ip::client_ip();
             $password = $this->compilePassword($password);
             $data = array(
             	'user_id'      => $uid,
                 'email'        => $email,
+                'mobile_phone' => $mobile,
                 'user_name'    => $username,
                 'password'     => $password,
                 'reg_time'     => $reg_date,
