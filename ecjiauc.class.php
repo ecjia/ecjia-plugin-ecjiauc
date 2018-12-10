@@ -46,7 +46,7 @@ class ecjiauc extends UserIntegrateAbstract
      */
     public function getCode()
     {
-        return 'ucenter';
+        return 'ecjiauc';
     }
 
     /**
@@ -81,8 +81,8 @@ class ecjiauc extends UserIntegrateAbstract
         return collect([
             'integrate_id'      => 2,
             'integrate_code'    => $this->getCode(),
-            'integrate_name'    => $this->loadLanguage('ucenter'),
-            'integrate_desc'    => $this->loadLanguage('ucenter_desc'),
+            'integrate_name'    => $this->loadLanguage('ecjiauc'),
+            'integrate_desc'    => $this->loadLanguage('ecjiauc_desc'),
             'configure'         => null,
         ]);
     }

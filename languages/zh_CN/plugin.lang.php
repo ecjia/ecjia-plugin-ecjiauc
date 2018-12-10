@@ -50,8 +50,8 @@
 defined('IN_ECJIA') or exit('No permission resources.');
 
 return array(
-    'ucenter' 				=> 'UCenter',
-    'ucenter_desc' 			=> 'Ucenter会员系统',
+    'ecjiauc' 				=> 'ECJia UCenter',
+    'ecjiauc_desc' 			=> 'ECjia Ucenter会员系统',
 );
 
 // end
