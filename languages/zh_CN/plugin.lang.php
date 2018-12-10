@@ -50,8 +50,25 @@
 defined('IN_ECJIA') or exit('No permission resources.');
 
 return array(
-    'ecjiauc' 				=> 'ECJia UCenter',
-    'ecjiauc_desc' 			=> 'ECjia Ucenter会员系统',
+    'ecjiauc' 				=> 'ECJiaUC',
+    'ecjiauc_desc' 			=> 'ECjia Ucenter会员系统，用于整合UCenter Client的会员系统，可以替代标准的Ucenter Server。',
+
+    'ucenter_integration'	=> '目前仅支持UCenter会员整合',
+    'ucenter_api_readme'	=> 'ECJia UCenter仅限使用接口连接方式。',
+
+    'ucenter_lable_id' 	    => 'ECJia UCenter 应用 ID:',
+    'ucenter_lable_key' 	=> 'ECJia UCenter 通信密钥:',
+    'ucenter_lable_url' 	=> 'ECJia UCenter 访问地址:',
+    'ucenter_lable_ip' 	    => 'ECJia UCenter IP 地址:',
+
+    'ucenter_notice_id' 	 => '该值为当前商店在 ECJia UCenter 的应用 ID，一般情况请不要改动',
+    'ucenter_notice_key' 	 => '通信密钥用于在 ECJia UCenter 和 ECJia 之间传输信息的加密，可包含任何字母及数字，请设置完全相同的通讯密钥，确保两套系统能够正常通信',
+    'ucenter_notice_url' 	 => '该值在您安装完 ECJia UCenter 后会被初始化，在您 ECJia UCenter 地址或者目录改变的情况下，修改此项，一般情况请不要改动 例如: http://www.sitename.com/sites/uc (最后不要加"/")',
+    'ucenter_notice_ip' 	 => '如果您的服务器无法通过域名访问 ECJia UCenter，可以输入 ECJia UCenter 服务器的 IP 地址',
+    'ucenter_notice_connect' => '请根据您的服务器网络环境选择适当的连接方式',
+    'ucenter_notice_db_host' => '可以是本地也可以是远程数据库服务器，如果 MySQL 端口不是默认的 3306，请填写如下形式：127.0.0.1:6033',
+
+
 );
 
 // end

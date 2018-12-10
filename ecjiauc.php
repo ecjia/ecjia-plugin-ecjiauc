@@ -30,8 +30,8 @@ Ecjia_PluginManager::extend('ecjiauc', function() {
     return new ecjiauc();
 });
 
-RC_Plugin::register_activation_hook(__FILE__, array('plugin_integrate_ucenter', 'install'));
-RC_Plugin::register_deactivation_hook(__FILE__, array('plugin_integrate_ucenter', 'uninstall'));
+RC_Plugin::register_activation_hook(__FILE__, array('plugin_integrate_ecjiauc', 'install'));
+RC_Plugin::register_deactivation_hook(__FILE__, array('plugin_integrate_ecjiauc', 'uninstall'));
 
 if (! function_exists('ecjia_uc_call')) {
     /**

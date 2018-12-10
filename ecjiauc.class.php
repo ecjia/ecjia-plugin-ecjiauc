@@ -79,7 +79,7 @@ class ecjiauc extends UserIntegrateAbstract
     public function getPluginMateData()
     {
         return collect([
-            'integrate_id'      => 2,
+            'integrate_id'      => 3,
             'integrate_code'    => $this->getCode(),
             'integrate_name'    => $this->loadLanguage('ecjiauc'),
             'integrate_desc'    => $this->loadLanguage('ecjiauc_desc'),
@@ -200,7 +200,7 @@ class ecjiauc extends UserIntegrateAbstract
 
             $this->setSession($uname);
             $this->setCookie($uname);
-            $this->ucdata = uc_call('uc_user_synlogin', array($uid));
+            $this->ucdata = ecjia_uc_call('uc_user_synlogin', array($uid));
 
             return true;
         } elseif($uid == -1) {
@@ -298,7 +298,7 @@ class ecjiauc extends UserIntegrateAbstract
      */
     public function checkUser($username, $password = null)
     {
-        $userdata = uc_call('uc_user_checkname', array($username));
+        $userdata = ecjia_uc_call('uc_user_checkname', array($username));
         if ($userdata == 1) {
             return false;
         } else {
@@ -317,7 +317,7 @@ class ecjiauc extends UserIntegrateAbstract
     public function checkEmail($email)
     {
         if (! empty($email)) {
-            $email_exist = uc_call('uc_user_checkemail', array($email));
+            $email_exist = ecjia_uc_call('uc_user_checkemail', array($email));
             if ($email_exist == 1) {
                 return false;
             } else {
@@ -368,7 +368,7 @@ class ecjiauc extends UserIntegrateAbstract
         }
 
         if (!empty($email)) {
-            $ucresult = uc_call("uc_user_edit", array($username, '', '', $email, 1));
+            $ucresult = ecjia_uc_call("uc_user_edit", array($username, '', '', $email, 1));
             if ($ucresult > 0 ) {
                 $flag = true;
             } elseif($ucresult == -4) {
@@ -389,7 +389,7 @@ class ecjiauc extends UserIntegrateAbstract
         }
         
         if (!empty($oldpassword) && !empty($password) && $forget_pwd == 0) {
-            $ucresult = uc_call("uc_user_edit", array($real_username, $oldpassword, $password, null));
+            $ucresult = ecjia_uc_call("uc_user_edit", array($real_username, $oldpassword, $password, null));
             if ($ucresult > 0 ) {
                 return true;
             } else {
@@ -397,7 +397,7 @@ class ecjiauc extends UserIntegrateAbstract
                 return false;
             }
         } elseif (!empty($password) && $forget_pwd == 1) {
-            $ucresult = uc_call("uc_user_edit", array($real_username, '', $password, '', 1));
+            $ucresult = ecjia_uc_call("uc_user_edit", array($real_username, '', $password, '', 1));
             if ($ucresult > 0 ) {
                 $flag = true;
             }
