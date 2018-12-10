@@ -230,18 +230,25 @@ class ecjiauc extends UserIntegrateAbstract
     /**
      * 添加用户
      *
-     * @param $username
-     * @param $password
-     * @param $email
+     * @param string $username
+     * @param string $password
+     * @param string $email
+     * @param string $mobile
      * @param int $gender
      * @param int $bday
      * @param int $reg_date
      * @param string $md5password
      * @return bool
      */
-    public function addUser($username, $password, $email, $gender = -1, $bday = 0, $reg_date = 0, $md5password = null)
+    public function addUser($username, $password, $email, $mobile = null, $gender = -1, $bday = 0, $reg_date = 0, $md5password = null)
     {
         /* 检测用户名 */
+        if ($this->checkUser($username)) {
+            $this->error = self::ERR_USERNAME_EXISTS;
+            return false;
+        }
+
+        /* 检测手机号 */
         if ($this->checkUser($username)) {
             $this->error = self::ERR_USERNAME_EXISTS;
             return false;
@@ -309,9 +316,7 @@ class ecjiauc extends UserIntegrateAbstract
     /**
      * 检测Email是否合法
      *
-     * @access  public
      * @param   string  $email   邮箱
-     *
      * @return  boolean
      */
     public function checkEmail($email)
@@ -322,6 +327,26 @@ class ecjiauc extends UserIntegrateAbstract
                 return false;
             } else {
                 $this->error = self::ERR_EMAIL_EXISTS;
+                return true;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 检测手机号是否合法
+     *
+     * @param   string  $mobile  手机号
+     * @return  boolean
+     */
+    public function checkMobile($mobile)
+    {
+        if (! empty($mobile)) {
+            $mobile_exist = ecjia_uc_call('uc_user_checkmobile', array($mobile));
+            if ($mobile_exist == 1) {
+                return false;
+            } else {
+                $this->error = self::ERR_MOBILE_EXISTS;
                 return true;
             }
         }
