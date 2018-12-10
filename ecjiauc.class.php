@@ -253,7 +253,7 @@ class ecjiauc extends UserIntegrateAbstract
             return false;
         }
 
-        $uid = uc_call('uc_user_register', array($username, $password, $email));
+        $uid = uc_call('uc_user_register', array($mobile, $password, $email));
         if ($uid <= 0) {
             if($uid == -1) {
                 $this->error = self::ERR_INVALID_USERNAME;
