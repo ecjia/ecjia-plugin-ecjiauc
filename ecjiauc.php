@@ -55,4 +55,19 @@ if (! function_exists('ecjia_uc_call')) {
     }
 }
 
+if (! function_exists('ecjiauc_connect_user')) {
+
+    /**
+     * @param $open_id
+     * @param $user_type
+     * @return ecjiauc_connect_user
+     */
+    function ecjiauc_connect_user($open_id, $user_type)
+    {
+        require_once RC_Plugin::plugin_dir_path(__FILE__) . 'ecjiauc_connect_user.class.php';
+
+        return new ecjiauc_connect_user($open_id, $user_type);
+    }
+}
+
 // end

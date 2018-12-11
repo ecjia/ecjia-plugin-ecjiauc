@@ -291,7 +291,10 @@ class ecjiauc extends UserIntegrateAbstract
                 'reg_time'     => $reg_date,
                 'last_ip'      => $ip
             );
-            RC_DB::table('users')->insert($data);
+            $user_id = RC_DB::table('users')->insertGetId($data);
+
+            ecjiauc_connect_user($uid, 'user')->createUser($user_id);
+
             return true;
         }
     }
