@@ -150,52 +150,16 @@ class ecjiauc extends UserIntegrateAbstract
 				}
 			}
 		}
-
 		
-        list($uid, $uname, $pwd, $email, $repeat) = ecjia_uc_call("uc_user_login", array($username, $password));
+        list($uid, $uname, $mobile, $email, $repeat) = ecjia_uc_call("uc_user_login", array($username, $password));
         $uname = addslashes($uname);
         if ($uid > 0) {
             //检查用户是否存在,不存在直接放入用户表
-            $result = RC_DB::table('users')->select('user_id', 'ec_salt')->where('user_name', $username)->fisrt();
-            $name_exist = $result['user_id'];
-            if (empty($result['ec_salt'])) {
-                $user_exist = RC_DB::table('users')->where('user_name', $username)->where('password', $this->compilePassword($password))->pluck('user_id');
-                if (! empty($user_exist)) {
-                    $ec_salt = rand(1, 9999);
-                    RC_DB::table('users')->where('user_id', $uid)->update([
-                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\Integrate\Password::PWD_SUF_SALT),
-                        'ec_salt' => $ec_salt
-                    ]);
-                }
-            } else {
-                $user_exist = RC_DB::table('users')->where('user_name', $username)
-                    ->where('password', $this->compilePassword($password, null, $result['ec_salt'], \Ecjia\App\Integrate\Password::PWD_SUF_SALT))
-                    ->pluck('user_id');
-            }
-            
-            if (empty($user_exist)) {
-                if (empty($name_exist)) {
-                    $reg_date = SYS_TIME;
-                    $ip = RC_Ip::client_ip();
-                    $password = $this->compilePassword($password);
-                    RC_DB::table('users')->insert([
-                        'user_id'       => $uid,
-                        'email'         => $email,
-                        'user_name'     => $uname,
-                        'password'      => $password,
-                        'reg_time'      => $reg_date,
-                        'last_login'    => $reg_date,
-                        'last_ip'       => $ip,
-                    ]);
-                } else {
-                    if (empty($result['ec_salt'])) {
-                         $result['ec_salt'] = 0;
-                    }
-                    RC_DB::table('users')->where('user_id', $uid)->update([
-                        'password' => $this->compilePassword($password, null, $ec_salt, \Ecjia\App\Integrate\Password::PWD_SUF_SALT),
-                        'ec_salt' => $result['ec_salt']
-                    ]);
-                }
+            $localUser = new \Ecjia\App\User\LocalUser();
+            $user = $localUser->getProfileByMobile($mobile);
+
+            if (empty($user)) {
+                $localUser->create($uname, null, $email, $mobile);
             }
 
             $this->setSession($uname);
