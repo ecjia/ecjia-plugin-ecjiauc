@@ -286,8 +286,9 @@ class ecjiauc extends UserIntegrateAbstract
                 'mobile_phone' => $mobile,
                 'user_name'    => $username,
                 'password'     => $password,
+                'sex'          => $gender,
+                'birthday'     => $bday,
                 'reg_time'     => $reg_date,
-                'last_login'   => $reg_date,
                 'last_ip'      => $ip
             );
             RC_DB::table('users')->insert($data);
