@@ -240,7 +240,7 @@ class ecjiauc extends UserIntegrateAbstract
      * @param string $md5password
      * @return bool
      */
-    public function addUser($username, $password, $email, $mobile = null, $gender = -1, $bday = 0, $reg_date = 0, $md5password = null)
+    public function addUser($username, $password, $email, $mobile = null, $gender = -1, $bday = null, $reg_date = 0, $md5password = null)
     {
         /* 检测手机号 */
         if (is_null($mobile)) {
