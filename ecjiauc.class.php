@@ -164,12 +164,12 @@ class ecjiauc extends UserIntegrateAbstract
             //检查用户是否存在,不存在直接放入用户表
             $localUser = new \Ecjia\App\User\LocalUser();
             $user = $localUser->getProfileByMobile($username);
-            if (! empty($user)) {
-                $local_user_id = $user->user_id;
+            if (empty($user)) {
+                $local_user_id = 0;
             } else {
                 $mobile = $user->mobile_phone;
                 $uid = uc_call('uc_user_register', array($mobile, $password, $user->email));
-                $local_user_id = 0;
+                $local_user_id = $user->user_id;
             }
         }
 
