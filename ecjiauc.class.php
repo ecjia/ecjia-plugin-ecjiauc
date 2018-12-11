@@ -132,6 +132,9 @@ class ecjiauc extends UserIntegrateAbstract
      */
     public function login($username, $password, $remember = null)
     {
+        /**
+         * $username 这里的$username 是手机号
+         */
 		if (is_email($username)) {
             $count = RC_DB::table('users')->where('email', $username)->count();
 			if ($count > 1) {
@@ -150,16 +153,41 @@ class ecjiauc extends UserIntegrateAbstract
 				}
 			}
 		}
-		
-        list($uid, $uname, $mobile, $email, $repeat) = ecjia_uc_call("uc_user_login", array($username, $password));
+
+		$isuid = 6;
+
+        list($uid, $uname, $pwd, $email, $repeat) = ecjia_uc_call("uc_user_login", array($username, $password, $isuid));
         $uname = addslashes($uname);
-        if ($uid > 0) {
+
+        if ($uid < 0) {
+            //检查Ucenter用户是否存在,不存在如果本地有用户，直接添加用户到Ucenter
             //检查用户是否存在,不存在直接放入用户表
             $localUser = new \Ecjia\App\User\LocalUser();
-            $user = $localUser->getProfileByMobile($mobile);
+            $user = $localUser->getProfileByMobile($username);
+            if (! empty($user)) {
+                $local_user_id = $user->user_id;
+            } else {
+                $mobile = $user->mobile_phone;
+                $uid = uc_call('uc_user_register', array($mobile, $password, $user->email));
+                $local_user_id = 0;
+            }
+        }
 
-            if (empty($user)) {
-                $localUser->create($uname, null, $email, $mobile);
+        if ($uid > 0) {
+            // 优先兼容 connect_user 表
+            //检查用户是否存在, 不存在直接放入ConnectUser表
+            $connect_user_id = ecjiauc_connect_user($uid, 'user')->getUserId();
+            if (empty($connect_user_id)) {
+                if (empty($local_user_id)) {
+                    // 首次登录或其他应用用户
+                    $localUser = new \Ecjia\App\User\LocalUser();
+                    $userModel = $localUser->createWithMobile($username);
+                    $local_user_id = $userModel->user_id;
+
+                    ecjiauc_connect_user($uid, 'user')->bindUser($local_user_id);
+                } else {
+                    ecjiauc_connect_user($uid, 'user')->createUser($local_user_id);
+                }
             }
 
             $this->setSession($uname);
