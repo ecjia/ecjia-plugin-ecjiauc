@@ -173,7 +173,13 @@ class ecjiauc extends UserIntegrateAbstract
 
 		$isuid = 6;
 
-        list($uid, $uname, $pwd, $email, $repeat) = ecjia_uc_call("uc_user_login", array($username, $password, $isuid));
+		$uc_call_result = ecjia_uc_call("uc_user_login", array($username, $password, $isuid));
+		if (is_ecjia_error($uc_call_result)) {
+            $this->error = $uc_call_result->get_error_message();
+		    return false;
+        }
+
+        list($uid, $uname, $pwd, $email, $repeat) = $uc_call_result;
         $uname = addslashes($uname);
 
         if ($uid < 0) {
