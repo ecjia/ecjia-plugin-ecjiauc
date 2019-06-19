@@ -191,7 +191,7 @@ class ecjiauc extends UserIntegrateAbstract
                 $local_user_id = 0;
             } else {
                 $mobile = $user->mobile_phone;
-                $uid = uc_call('uc_user_register', array($mobile, $password, $user->email));
+                $uid = ecjia_uc_call('uc_user_register', array($mobile, $password, $user->email));
                 $local_user_id = $user->user_id;
             }
         }
@@ -270,7 +270,7 @@ class ecjiauc extends UserIntegrateAbstract
             return false;
         }*/
 
-        $uid = uc_call('uc_user_register', array($mobile, $password, $email));
+        $uid = ecjia_uc_call('uc_user_register', array($mobile, $password, $email));
         if ($uid <= 0) {
             if($uid == -1) {
                 $this->error = self::ERR_INVALID_USERNAME;
