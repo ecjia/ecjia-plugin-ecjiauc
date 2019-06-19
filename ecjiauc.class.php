@@ -274,25 +274,21 @@ class ecjiauc extends UserIntegrateAbstract
         if ($uid <= 0) {
             if($uid == -1) {
                 $this->error = self::ERR_INVALID_USERNAME;
-                return false;
             } elseif($uid == -2) {
                 $this->error = self::ERR_USERNAME_NOT_ALLOW;
-                return false;
             } elseif($uid == -3) {
                 $this->error = self::ERR_USERNAME_EXISTS;
-                return false;
             } elseif($uid == -4) {
                 $this->error = self::ERR_INVALID_EMAIL;
-                return false;
             } elseif($uid == -5) {
                 $this->error = self::ERR_EMAIL_NOT_ALLOW;
-                return false;
             } elseif($uid == -6) {
                 $this->error = self::ERR_EMAIL_EXISTS;
-                return false;
             } else {
-                return false;
+                $this->error = $uid;
             }
+
+            return false;
         } else {
             //注册成功，插入用户表
             $ip = RC_Ip::client_ip();
