@@ -263,10 +263,12 @@ class ecjiauc extends UserIntegrateAbstract
             return false;
         }
 
+        /**
+         * 手机号不存在直接登录，暂且不作判断
         if ($this->checkMobile($mobile)) {
             $this->error = self::ERR_MOBILE_EXISTS;
             return false;
-        }
+        }*/
 
         $uid = uc_call('uc_user_register', array($mobile, $password, $email));
         if ($uid <= 0) {
